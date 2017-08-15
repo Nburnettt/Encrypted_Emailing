@@ -2,6 +2,7 @@ from __future__ import print_function
 import httplib2
 import os
 import base64
+from EncryptedMessages import EncryptedMessages
 
 from apiclient import discovery
 from oauth2client import client
@@ -43,24 +44,18 @@ def get_credentials():
 
 def main():
     credentials = get_credentials()
-    http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=http)
-    query = 'subject:[encEmail]'
-    results = service.users().messages().list(userId='me', labelIds=None, q=query).execute()
-    messages = results.get('messages', [])
-    message_ids = [message['id'] for message in messages]
-    messages_list = []
-    for message_id in message_ids:
-        params = {'userId': 'me',
-                  'id': message_id,
-                  'format': None,
-                  'metadataHeaders': None
-                  }
-        results = service.users().messages().get(**params).execute()
-        messages_list += [results]
-    for message in messages_list:
-        encoded_body = message['payload']['parts'][0]['body']['data']
-        body = base64.standard_b64decode(encoded_body).decode('utf-8')
-        print(body)
+    encrypted_messages = EncryptedMessages(credentials)
+    message_ids = encrypted_messages.get_encrypted_message_ids()
+    encrypted_messages.list_messages()
+    #     results = service.users().messages().get(**params).execute()
+    #     messages_list += [results]
+    # for message in messages_list:
+    #     message_from = [entry['value'] for entry in message['payload']['headers']
+    #                     if entry['name'] == 'From'][0]
+        # encoded_body = message['payload']['parts'][0]['body']['data']
+        # body = base64.standard_b64decode(encoded_body).decode('utf-8')
+        # print(message['payload']['headers'])
+        # print(body)
+
 if __name__ == '__main__':
     main()
