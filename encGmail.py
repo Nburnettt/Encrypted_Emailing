@@ -1,7 +1,5 @@
 from __future__ import print_function
-import httplib2
 import os
-import base64
 from EncryptedMessages import EncryptedMessages
 
 from apiclient import discovery
@@ -42,20 +40,48 @@ def get_credentials():
     return credentials
 
 
+def display_menu():
+    menu = 'Commands:\n'
+    menu += '\texit - Leave the terminal\n'
+    menu += '\tinbox - Display user inbox\n'
+    menu += '\tview <num> - View message num (listed by inbox)\n'
+    menu += '\thelp - Displays this menu\n'
+    print(menu)
+
+
+def get_user_input():
+    menu = ': '
+    user_input = input(menu)
+    return user_input
+
+
+def error():
+    print('Invalid Command')
+    display_menu()
+
+
 def main():
     credentials = get_credentials()
     encrypted_messages = EncryptedMessages(credentials)
-    message_ids = encrypted_messages.get_encrypted_message_ids()
-    encrypted_messages.list_messages()
-    #     results = service.users().messages().get(**params).execute()
-    #     messages_list += [results]
-    # for message in messages_list:
-    #     message_from = [entry['value'] for entry in message['payload']['headers']
-    #                     if entry['name'] == 'From'][0]
-        # encoded_body = message['payload']['parts'][0]['body']['data']
-        # body = base64.standard_b64decode(encoded_body).decode('utf-8')
-        # print(message['payload']['headers'])
-        # print(body)
+    user_input = [1]
+    display_menu()
+    while user_input[0] != 'exit':
+        user_input = get_user_input().split(' ')
+        num_args = len(user_input)
+        if num_args == 1:
+            if user_input[0] == 'inbox':
+                encrypted_messages.list_messages()
+            elif user_input[0] == 'help':
+                display_menu()
+            else:
+                error()
+        elif num_args == 2:
+            if user_input[0] == 'view':
+                message_index = int(user_input[1])
+                encrypted_messages.display_message(message_index)
+            else:
+                error()
+
 
 if __name__ == '__main__':
     main()
