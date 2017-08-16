@@ -11,7 +11,8 @@ class EncryptedMessages(object):
     def list_messages(self):
         messages_list = self.get_encrypted_message_list()
         for message in messages_list:
-            print(message.date, message.sender)
+            format = 'Recieved: {}\n\tFrom: {}'.format(message.date, message.sender)
+            print(format)
 
     def get_encrypted_message_ids(self):
         query = 'subject:[encEmail]'
