@@ -1,6 +1,8 @@
 from __future__ import print_function
 import httplib2
 import os
+import base64
+from EncryptedMessages import EncryptedMessages
 
 from apiclient import discovery
 from oauth2client import client
@@ -21,21 +23,12 @@ APPLICATION_NAME = 'Gmail API Python Quickstart'
 
 
 def get_credentials():
-    """Gets valid user credentials from storage.
-
-    If nothing has been stored, or if the stored credentials are invalid,
-    the OAuth2 flow is completed to obtain the new credentials.
-
-    Returns:
-        Credentials, the obtained credential.
-    """
     home_dir = os.path.expanduser('~')
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
     credential_path = os.path.join(credential_dir,
                                    'gmail-python-quickstart.json')
-
     store = Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
@@ -48,26 +41,21 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
+
 def main():
-    """Shows basic usage of the Gmail API.
-
-    Creates a Gmail API service object and outputs a list of label names
-    of the user's Gmail account.
-    """
     credentials = get_credentials()
-    http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=http)
-
-    results = service.users().labels().list(userId='me').execute()
-    labels = results.get('labels', [])
-
-    if not labels:
-        print('No labels found.')
-    else:
-      print('Labels:')
-      for label in labels:
-        print(label['name'])
-
+    encrypted_messages = EncryptedMessages(credentials)
+    message_ids = encrypted_messages.get_encrypted_message_ids()
+    encrypted_messages.list_messages()
+    #     results = service.users().messages().get(**params).execute()
+    #     messages_list += [results]
+    # for message in messages_list:
+    #     message_from = [entry['value'] for entry in message['payload']['headers']
+    #                     if entry['name'] == 'From'][0]
+        # encoded_body = message['payload']['parts'][0]['body']['data']
+        # body = base64.standard_b64decode(encoded_body).decode('utf-8')
+        # print(message['payload']['headers'])
+        # print(body)
 
 if __name__ == '__main__':
     main()
